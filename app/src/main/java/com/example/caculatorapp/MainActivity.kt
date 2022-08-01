@@ -8,7 +8,7 @@ import com.example.caculatorapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private val binding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private var canAddOperation = false
     private var canAddDemical = false
     private var alreadyAddDemical = false
@@ -16,39 +16,37 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
 
     fun numberAction(view: View) {
-        if (view is Button){
-            if (view.text == "."){
-                if(binding.tvWorkings.length() > 0)
-                    if (canAddDemical && isNumber(binding.tvWorkings.text.last())){
-                        binding.tvWorkings.append(view.text)
-                        canAddDemical = false
-                        canAddOperation = false
-                        alreadyAddDemical = true
-                    }
-            }
-            else {
+        if (view is Button) {
+            if (view.text == ".") {
+                if (binding.tvWorkings.length() > 0 && canAddDemical && isNumber(binding.tvWorkings.text.last())) {
+                    binding.tvWorkings.append(view.text)
+                    canAddDemical = false
+                    canAddOperation = false
+                    alreadyAddDemical = true
+                }
+            } else {
                 binding.tvWorkings.append(view.text)
                 canAddOperation = true
                 if (!alreadyAddDemical) canAddDemical = true
             }
         }
     }
+
     fun operatorAction(view: View) {
-        if(binding.tvWorkings.length() > 0)
-            if (view is Button && canAddOperation && isNumber(binding.tvWorkings.text.last())){
-                binding.tvWorkings.append(view.text)
-                if (alreadyAddDemical) alreadyAddDemicalPrevious = true
-                else alreadyAddDemicalPrevious = false
-                canAddOperation = false
-                alreadyAddDemical = false
-                canAddDemical = false
-            }
+        if (binding.tvWorkings.length() > 0 && view is Button && canAddOperation && isNumber(binding.tvWorkings.text.last())) {
+            binding.tvWorkings.append(view.text)
+            if (alreadyAddDemical) alreadyAddDemicalPrevious = true
+            else alreadyAddDemicalPrevious = false
+            canAddOperation = false
+            alreadyAddDemical = false
+            canAddDemical = false
+        }
     }
+
     fun allClearAction(view: View) {
         binding.tvWorkings.text = ""
         binding.tvResults.text = ""
@@ -57,12 +55,13 @@ class MainActivity : AppCompatActivity() {
         alreadyAddDemical = false
         alreadyAddDemicalPrevious = false
     }
+
     fun backspaceAction(view: View) {
         val length = binding.tvWorkings.length()
-        if (length > 0 ){
+        if (length > 0) {
             var lastToRemove: Char = binding.tvWorkings.text.last()
-            when(lastToRemove){
-                '+','-','x','/' -> {
+            when (lastToRemove) {
+                '+', '-', 'x', '/' -> {
                     binding.tvWorkings.text = binding.tvWorkings.text.subSequence(0, length - 1)
                     canAddOperation = true
                     if (!alreadyAddDemicalPrevious) canAddDemical = true
@@ -78,13 +77,17 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
     fun equalsAction(view: View) {
         binding.tvResults.text = caculateResults()
     }
 
-    private fun isNumber(char: Char): Boolean{
-        when(char){
-            '0','1','2','3','4','5','6','7','8','9' -> return true
+    private fun isNumber(char: Char): Boolean {
+        when (char) {
+            numberChar.ZERO.number, numberChar.ONE.number, numberChar.TWO.number,
+            numberChar.THREE.number, numberChar.FOUR.number, numberChar.FIVE.number,
+            numberChar.SIX.number, numberChar.SEVEN.number, numberChar.EIGHT.number,
+            numberChar.NINE.number -> return true
             else -> return false
         }
     }
@@ -93,17 +96,17 @@ class MainActivity : AppCompatActivity() {
         val digitOperators = digitsOperator()
         if (digitOperators.isEmpty()) return ""
 
-        val timeDivision = timeDivisionCaculate(digitOperators)
-        if (timeDivision.isEmpty()) return ""
+        val multiplyDivide = multiplyDivideCaculate(digitOperators)
+        if (multiplyDivide.isEmpty()) return ""
 
-        val result = addSubtractCaculate(timeDivision)
+        val result = addSubtractCaculate(multiplyDivide)
         return result.toString()
     }
 
     private fun addSubtractCaculate(passedList: MutableList<Any>): Float {
         var result = passedList[0].toString().toFloat()
-        for (i in passedList.indices){
-            if (passedList[i] is Char && i != passedList.lastIndex){
+        for (i in passedList.indices) {
+            if (passedList[i] is Char && i != passedList.lastIndex) {
                 val operator = passedList[i]
                 val nextDigit = passedList[i + 1].toString().toFloat()
                 if (operator == '+')
@@ -116,9 +119,9 @@ class MainActivity : AppCompatActivity() {
         return result
     }
 
-    private fun timeDivisionCaculate(passedList: MutableList<Any>): MutableList<Any> {
+    private fun multiplyDivideCaculate(passedList: MutableList<Any>): MutableList<Any> {
         var list = passedList
-        while (list.contains('x') || list.contains('/')){
+        while (list.contains('x') || list.contains('/')) {
             list = caculateTimeDivide(list)
         }
         return list
@@ -128,12 +131,12 @@ class MainActivity : AppCompatActivity() {
         val newList = mutableListOf<Any>()
         var restartIndex = passedList.size
 
-        for (i in passedList.indices){
-            if (passedList[i] is Char && i != passedList.lastIndex && i < restartIndex){
+        for (i in passedList.indices) {
+            if (passedList[i] is Char && i != passedList.lastIndex && i < restartIndex) {
                 val operator = passedList[i]
                 val prevDigit = passedList[i - 1].toString().toFloat()
                 val nextDigit = passedList[i + 1].toString().toFloat()
-                when(operator){
+                when (operator) {
                     'x' -> {
                         newList.add(prevDigit * nextDigit)
                         restartIndex = i + 1
@@ -149,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            if (i > restartIndex){
+            if (i > restartIndex) {
                 newList.add(passedList[i])
             }
         }
@@ -157,13 +160,13 @@ class MainActivity : AppCompatActivity() {
         return newList
     }
 
-    private fun digitsOperator(): MutableList<Any>{
+    private fun digitsOperator(): MutableList<Any> {
         val list = mutableListOf<Any>()
         var currentDigit = ""
-        for (character in binding.tvWorkings.text){
+        for (character in binding.tvWorkings.text) {
             if (character.isDigit() || character == '.')
                 currentDigit += character
-            else{
+            else {
                 list.add(currentDigit.toFloat())
                 currentDigit = ""
                 list.add(character)
@@ -174,5 +177,18 @@ class MainActivity : AppCompatActivity() {
             list.add(currentDigit)
 
         return list
+    }
+
+    enum class numberChar(val number: Char) {
+        ZERO('0'),
+        ONE('1'),
+        TWO('2'),
+        THREE('3'),
+        FOUR('4'),
+        FIVE('5'),
+        SIX('6'),
+        SEVEN('7'),
+        EIGHT('8'),
+        NINE('9'),
     }
 }

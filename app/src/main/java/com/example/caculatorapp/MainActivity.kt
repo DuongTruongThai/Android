@@ -93,18 +93,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun caculateResults(): String {
-        val digitOperators = digitsOperator()
-        if (digitOperators.isEmpty()) return ""
+        if (digitsOperator().isEmpty()) return ""
 
-        val multiplyDivide = multiplyDivideCaculate(digitOperators)
-        if (multiplyDivide.isEmpty()) return ""
+        if (multiplyDivideCaculate(digitsOperator()).isEmpty()) return ""
 
-        val result = addSubtractCaculate(multiplyDivide)
-        return result.toString()
+        return addSubtractCaculate(multiplyDivideCaculate(digitsOperator())).toString()
     }
 
     private fun addSubtractCaculate(passedList: MutableList<Any>): Float {
-        var result = passedList[0].toString().toFloat()
+        var result = passedList.firstOrNull().toString().toFloat()
         for (i in passedList.indices) {
             if (passedList[i] is Char && i != passedList.lastIndex) {
                 val operator = passedList[i]
